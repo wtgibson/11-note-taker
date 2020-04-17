@@ -2,9 +2,8 @@
 
 ## Summary 
 
-The purpose of the assignment was to create a CLI application that takes in information about employees and automatically generates an HTML page that displays summaries for each person.
+The purpose of the assignment was to create an application that can be used to write, save, and delete notes. This application uses an express backend and save and retrieve note data from a JSON file.
 
-Create an application that can be used to write, save, and delete notes. This application will use an express backend and save and retrieve note data from a JSON file.
 
 ```
 User Story
@@ -22,8 +21,8 @@ Acceptance Criteria
 
 ## Application Pictures
 
-![Site](#)
-![Site](#)
+![Site](images/note-landing.png)
+![Site](images/note.png)
 
 ## Technologies Used
 
@@ -33,61 +32,35 @@ Acceptance Criteria
 - JavaScript - provides dynamic interactivity on HTML documents
 - jQuery - easy to use API library simplifying Javascript actions
 - Node.js - asynchronous event-driven JavaScript runtime
-- Express - asynchronous event-driven JavaScript runtime
+- Express - Node.js web application server framework, designed for building web applications
 - Git - version control system to track changes to source code
 - GitHub - hosts repository that can be deployed to GitHub Pages
 
 ## Code Snippet
 
-Below is an example of a block of code in the app.js file where the user is prompted with questions regarding the team member they would like to add and the new team member object is created and pushed into an array holding all other team members. Lastly the user is asked what kind of team member they would like to add next or if they are done adding team members. 
+Below is a block of code in the server.js file that enables the note saving functionality of the app. 
 
 ```js
-async function createTeam() {
-    
-    // Variable holding tema members
-    const team = [];
-    
-    // Always with Manager
-    let role = "Manager";
-    
-    // While loop for until user selects no more team members
-    while (role != "No more team members") {
-        
-        // Prompt user for employee info
-        const employeeInfo = await inquirer.prompt(employeeQuestions);
-        
-        // Prompt user for Manager, Engineer, or Intern specific info and create new team member with constructor function of selected subclass
-        let specificInfo;
-        let newTeamMember;
+app.post("/api/notes", (req, res) => {
+    const newNote = req.body;
+    const newID = Date.now();
+    newNote.id = newID;
 
-        switch (role) {
+    fs.readFile(dbPath, (err, data) => {
+        if (err) throw err;
+        const notes = JSON.parse(data);
 
-            case "Manager":
-                specificInfo = await inquirer.prompt(managerQuestions);
-                newTeamMember = new Manager(employeeInfo.name, employeeInfo.id, employeeInfo.email, specificInfo.officeNumber);
-                break;
-            case "Engineer":
-                specificInfo = await inquirer.prompt(engineerQuestions);
-                newTeamMember = new Engineer(employeeInfo.name, employeeInfo.id, employeeInfo.email, specificInfo.github);
-                break;
-            case "Intern":
-                specificInfo = await inquirer.prompt(internQuestions);
-                newTeamMember = new Intern(employeeInfo.name, employeeInfo.id, employeeInfo.email, specificInfo.school);
-                break;
-            default:
-                console.log("Error, something went wrong")    
-        }
-
-        // Add new team member to team
-        team.push(newTeamMember);
-
-        // Prompt for next team member role
-        const answer = await inquirer.prompt(nextTeamMember);
-        role = answer.next;
-    }
+        notes.push(newNote);
+        const writeNotes = JSON.stringify(notes);
+        fs.writeFile(dbPath, writeNotes, err => {
+            if (err) throw err;
+            res.sendFile(dbPath);
+        });
+    });
+});
 ```
 
-[Deployed Portfolio Page Site](#)
+[Deployed Portfolio Page Site](https://note-taker-wtg.herokuapp.com/)
 
 [GitHub Project Repo](https://github.com/wtgibson/11-note-taker)
 
